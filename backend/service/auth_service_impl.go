@@ -57,9 +57,7 @@ func (s *AuthServiceImpl) Register(ctx context.Context, req model.RegisterReques
 		return err
 	}
 
-	if req.Role == "" {
-		req.Role = "user"
-	}
+	req.Role = "user"
 
 	user := model.User {
 		Username: req.Username,

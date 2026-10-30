@@ -20,11 +20,13 @@ import (
 
 // Injectors from injector.go:
 
-func InitializedSever() *http.Server {
+func InitializedServer() *http.Server {
 	userRepositoryImpl := repository.NewUserRepository()
 	db := app.NewDB()
 	authServiceImpl := service.NewAuthService(userRepositoryImpl, db)
 	authControllerImpl := controller.NewAuthController(authServiceImpl)
-	server := app.NewServer(authControllerImpl)
+	userServiceImpl := service.NewUserService(userRepositoryImpl, db)
+	userControllerImpl := controller.NewUserController(userServiceImpl)
+	server := app.NewServer(authControllerImpl, userControllerImpl)
 	return server
 }

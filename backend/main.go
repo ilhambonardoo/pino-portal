@@ -10,7 +10,7 @@ import (
 func main(){
 	helper.LoadEnv()
 
-	server := InitializedSever()
+	server := InitializedServer()
 
 	if err := server.ListenAndServe(); err != nil {
 		log.Fatalf("Gagal menjalankan server : %v", err)
