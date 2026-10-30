@@ -3,6 +3,7 @@ package controller
 import (
 	"encoding/json"
 	"net/http"
+	"pino-portal/exception"
 	"pino-portal/model"
 	"pino-portal/service"
 
@@ -10,13 +11,13 @@ import (
 )
 
 type AuthControllerImpl struct {
-    AuthService service.AuthService
+	AuthService service.AuthService
 }
 
 func NewAuthController(authService service.AuthService) *AuthControllerImpl {
-    return &AuthControllerImpl{
-        AuthService: authService,
-    }
+	return &AuthControllerImpl{
+		AuthService: authService,
+	}
 }
 
 var AuthControllerSet = wire.NewSet(
@@ -24,50 +25,38 @@ var AuthControllerSet = wire.NewSet(
 	wire.Bind(new(AuthController), new(*AuthControllerImpl)),
 )
 
-func (c *AuthControllerImpl) Register(writer http.ResponseWriter, request *http.Request){
+func (c *AuthControllerImpl) Register(writer http.ResponseWriter, request *http.Request) {
 	var req model.RegisterRequest
 
 	if err := json.NewDecoder(request.Body).Decode(&req); err != nil {
-		writer.Header().Set("Content-Type", "application/json")
-		writer.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(writer).Encode(map[string]string{"error" : "Payload request tidak valid"})
+		exception.InvalidPayload(writer)
 		return
 	}
 
 	err := c.AuthService.Register(request.Context(), req)
 
 	if err != nil {
-		writer.Header().Set("Content-Type", "application/json")
-		writer.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(writer).Encode(map[string]string{"error" : err.Error()})
+		exception.Error(writer, http.StatusBadRequest, err)
 		return
 	}
 
-	writer.Header().Set("Content-Type", "application/json")
-	writer.WriteHeader(http.StatusCreated)
-	json.NewEncoder(writer).Encode(map[string]string{"message" : "User berhasil didaftarkan"})
+	exception.Message(writer, http.StatusCreated, "User berhasil didaftarkan")
 }
 
-func (c *AuthControllerImpl) Login(writer http.ResponseWriter, request *http.Request){
+func (c *AuthControllerImpl) Login(writer http.ResponseWriter, request *http.Request) {
 	var req model.LoginRequest
 
 	if err := json.NewDecoder(request.Body).Decode(&req); err != nil {
-		writer.Header().Set("Content-Type", "application/json")
-		writer.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(writer).Encode(map[string]string{"error" : "Payload request tidak valid"})
+		exception.InvalidPayload(writer)
 		return
 	}
 
 	res, err := c.AuthService.Login(request.Context(), req)
-	
+
 	if err != nil {
-		writer.Header().Set("Content-Type", "application/json")
-		writer.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(writer).Encode(map[string]string{"error" : err.Error()})
+		exception.Error(writer, http.StatusUnauthorized, err)
 		return
 	}
 
-	writer.Header().Set("Content-Type", "application/json")
-	writer.WriteHeader(http.StatusOK)
-	json.NewEncoder(writer).Encode(res)
+	exception.JSON(writer, http.StatusOK, res)
 }
