@@ -33,8 +33,8 @@ func AuthMiddleware(allowedRoles ...string) func(http.Handler) http.Handler{
 				isAllowed := slices.Contains(allowedRoles, claims.Role)
 				if !isAllowed {
 					http.Error(w, `{"error" : "Akses ditolak"}`, http.StatusForbidden)
+					return
 				}
-				return
 			}
 			
 			ctx := context.WithValue(r.Context(), UserRoleKey, claims.Role)
