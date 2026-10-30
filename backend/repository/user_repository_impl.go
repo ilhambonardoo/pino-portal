@@ -12,7 +12,6 @@ import (
 type UserRepositoryImpl struct {
 }
 
-
 func NewUserRepository() *UserRepositoryImpl {
 	return &UserRepositoryImpl{}
 }
@@ -39,7 +38,7 @@ func (r *UserRepositoryImpl) Save(ctx context.Context, tx *sql.Tx, user model.Us
 	return user, nil
 }
 
-func (r *UserRepositoryImpl) FindByUsername(ctx context.Context, db *sql.DB, username string) (model.User, error){
+func (r *UserRepositoryImpl) FindByUsername(ctx context.Context, db Queryer, username string) (model.User, error){
 	query := "SELECT id, username, password_hash, role, created_at FROM users WHERE username = ?"
 	row := db.QueryRowContext(ctx, query, username)
 	
