@@ -8,6 +8,7 @@ import (
 	"pino-portal/model"
 	"pino-portal/repository"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/google/wire"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -15,12 +16,14 @@ import (
 type AuthServiceImpl struct{
 	UserRepo repository.UserRepository
 	DB *sql.DB
+	Validate *validator.Validate
 }
 
 func NewAuthService(userRepo repository.UserRepository, db *sql.DB) *AuthServiceImpl {
 	return &AuthServiceImpl{
 		UserRepo: userRepo,
 		DB: db,
+		Validate: validator.New(),
 	}
 }
 
@@ -30,6 +33,11 @@ var AuthServiceSet = wire.NewSet(
 )
 
 func (s *AuthServiceImpl) Register(ctx context.Context, req model.RegisterRequest) error {
+	err := s.Validate.Struct(req)
+	if err != nil {
+		return errors.New("Validasi gagal: " + err.Error())
+	}
+
 	tx, err := s.DB.BeginTx(ctx, nil)
 
 	if err != nil {
@@ -37,6 +45,11 @@ func (s *AuthServiceImpl) Register(ctx context.Context, req model.RegisterReques
 	}
 
 	defer helper.CommitOrRollBack(tx)
+
+	_, err = s.UserRepo.FindByUsername(ctx, tx, req.Username)
+	if err == nil {
+		return errors.New("Username sudah terdaftar")
+	}
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	
@@ -59,24 +72,28 @@ func (s *AuthServiceImpl) Register(ctx context.Context, req model.RegisterReques
 	return err
 }
 
-func (s *AuthServiceImpl) Login(ctx context.Context, req model.LoginRequest) (model.AuthResponse, error) {
-	user, err := s.UserRepo.FindByUsername(ctx, s.DB, req.Username)
-
+func (s *AuthServiceImpl) Login(ctx context.Context, req model.LoginRequest) (model.LoginResponse, error) {
+	err := s.Validate.Struct(req)
 	if err != nil {
-		return model.AuthResponse{}, errors.New("username atau password salah")
+		return model.LoginResponse{}, errors.New("Validasi gagal:" + err.Error())
+	}
+
+	user, err := s.UserRepo.FindByUsername(ctx, s.DB, req.Username)
+	if err != nil {
+		return model.LoginResponse{}, errors.New("Username atau password salah")
 	}
 	
 	err = bcrypt.CompareHashAndPassword([]byte (user.PasswordHash), []byte(req.Password))
 	if err != nil {
-		return model.AuthResponse{}, errors.New("username atau password salah")
+		return model.LoginResponse{}, errors.New("Username atau password salah")
 	}
 
 	token, err := helper.GenerateToken(user.ID, user.Role)
 	if err != nil {
-		return model.AuthResponse{}, err
+		return model.LoginResponse{}, err
 	}
 
-	return model.AuthResponse{
+	return model.LoginResponse{
 		Token: token,
 		Role: user.Role,
 	}, nil

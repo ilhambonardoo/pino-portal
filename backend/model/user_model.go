@@ -11,17 +11,17 @@ type User struct {
 }
 
 type RegisterRequest struct {
-	Username 		string	`json:"username"`
-	Password		string 	`json:"password"`
-	Role			string	`json:"role"`
+	Username string `json:"username" validate:"required,alphanum,min=3,max=30"`
+	Password string `json:"password" validate:"required,min=6"`
+	Role     string `json:"role" validate:"omitempty,oneof=admin operator user"`
 }
 
 type LoginRequest struct {
-	Username 		string	`json:"username"`
-	Password		string 	`json:"password"`
+	Username string `json:"username" validate:"required"`
+	Password string `json:"password" validate:"required"`
 }
 
-type AuthResponse struct {
-	Token			string `json:"token"`
-	Role			string `json:"role"`
+type LoginResponse struct {
+	Token string `json:"token"`
+	Role  string `json:"role"`
 }

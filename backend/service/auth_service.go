@@ -7,5 +7,5 @@ import (
 
 type AuthService interface{
 	Register(ctx context.Context, req model.RegisterRequest) error
-	Login(ctx context.Context, req model.LoginRequest) (model.AuthResponse, error)
+	Login(ctx context.Context, req model.LoginRequest) (model.LoginResponse, error)
 }
