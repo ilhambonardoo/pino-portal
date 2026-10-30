@@ -15,7 +15,7 @@ import (
 
 var ServerSet = wire.NewSet(NewServer)
 
-func NewServer(authController controller.AuthController) *http.Server {
+func NewServer(authController controller.AuthController, userController controller.UserController) *http.Server {
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
@@ -33,6 +33,15 @@ func NewServer(authController controller.AuthController) *http.Server {
 	r.Route("/api/v1/auth", func (r chi.Router)  {
 		r.Post("/register", authController.Register)
 		r.Post("/login", authController.Login)
+	})
+
+	r.Route("/api/v1/users", func(r chi.Router) {
+		r.Use(customMiddleware.AuthMiddleware("admin"))
+		r.Get("/", userController.FindAll)
+		r.Post("/", userController.Create)
+		r.Get("/{id}", userController.FindByID)
+		r.Put("/{id}", userController.Update)
+		r.Delete("/{id}", userController.Delete)
 	})
 	
 	r.Route("/api/v1/admin", func(r chi.Router) {

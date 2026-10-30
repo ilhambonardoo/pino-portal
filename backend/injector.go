@@ -14,12 +14,14 @@ import (
 )
 
 
-func InitializedSever() *http.Server {
+func InitializedServer() *http.Server {
 	wire.Build(
 		app.NewDB,
 		repository.UserRepositorySet,
 		service.AuthServiceSet,
+		service.UserServiceSet,
 		controller.AuthControllerSet,
+		controller.UserControllerSet,
 		app.ServerSet,
 	)
 	return nil
