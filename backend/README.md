@@ -72,6 +72,9 @@ go get github.com/google/wire
 # Install CLI tool wire untuk generate kode
 go install github.com/google/wire/cmd/wire@lates
 
+# Install library validator
+go get github.com/go-playground/validator/v10
+
 ```
 
 Atau cukup jalankan perintah otomatis dari `go.mod`:
