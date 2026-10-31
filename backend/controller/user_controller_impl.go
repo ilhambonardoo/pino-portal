@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"pino-portal/exception"
+	"pino-portal/middleware"
 	"pino-portal/model"
 	"pino-portal/service"
 	"strconv"
@@ -78,12 +79,13 @@ func (c *UserControllerImpl) Update(writer http.ResponseWriter, request *http.Re
 }
 
 func (c *UserControllerImpl) Delete(writer http.ResponseWriter, request *http.Request) {
-	id, ok := parseUserID(writer, request)
+	targetID, ok := parseUserID(writer, request)
 	if !ok {
 		return
 	}
 
-	if err := c.UserService.Delete(request.Context(), id); err != nil {
+	userID, ok := request.Context().Value(middleware.UserIDKey).(int)
+	if err := c.UserService.Delete(request.Context(), userID, targetID); err != nil {
 		exception.Error(writer, http.StatusBadRequest, err)
 		return
 	}
