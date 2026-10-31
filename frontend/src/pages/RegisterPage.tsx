@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { api } from "../services/api";
-import axios from "axios";
-import type { ApiError } from "../type/auth";
+import { getApiError } from "../helper/error_handler";
+import AuthInput from "../components/AuthInput";
+import { ErrorMessage, SuccessMessage } from "../components/HandleMessage";
 
 const RegisterPage = () => {
   const [username, setUsername] = useState("");
@@ -35,12 +36,7 @@ const RegisterPage = () => {
         navigate("/login");
       }, 1500);
     } catch (err) {
-      if (axios.isAxiosError(err) && err.response) {
-        const apiError = err.response.data as ApiError;
-        setErrorMsg(apiError.error || "Terjadi kesalahan saat registrasi.");
-      } else {
-        setErrorMsg("Gagal terhubung ke server.");
-      }
+      setErrorMsg(getApiError(err, "Terjadi kesalahan saat registrasi."));
     } finally {
       setLoading(false);
     }
@@ -54,46 +50,27 @@ const RegisterPage = () => {
           <p className="text-slate-400 text-sm">Buat Akun Baru</p>
         </div>
 
-        {errorMsg && (
-          <div className="mb-4 p-3 bg-red-500/10 border border-red-500/50 rounded-lg text-red-400 text-sm">
-            {errorMsg}
-          </div>
-        )}
-
-        {successMsg && (
-          <div className="mb-4 p-3 bg-green-500/10 border border-green-500/50 rounded-lg text-green-400 text-sm">
-            {successMsg}
-          </div>
-        )}
+        <ErrorMessage message={errorMsg} />
+        <SuccessMessage message={successMsg} />
 
         <form onSubmit={handleSubmit} className="space-y-5">
-          <div>
-            <label className="block text-sm font-medium text-slate-300 mb-1">
-              Username
-            </label>
-            <input
-              type="text"
-              required
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              className="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
-              placeholder="Minimal 3 karakter"
-            />
-          </div>
+          <AuthInput
+            id="username"
+            label="Username"
+            type="text"
+            onChange={setUsername}
+            value={username}
+            placeholder="Minimal 3 karakter"
+          />
 
-          <div>
-            <label className="block text-sm font-medium text-slate-300 mb-1">
-              Password
-            </label>
-            <input
-              type="password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
-              placeholder="Minimal 6 karakter"
-            />
-          </div>
+          <AuthInput
+            id="password"
+            label="Password"
+            type="password"
+            value={password}
+            onChange={setPassword}
+            placeholder="Minimal 6 karakter"
+          />
 
           <button
             type="submit"
