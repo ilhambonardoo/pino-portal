@@ -4,6 +4,7 @@ import LoginPage from "./pages/LoginPage";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { AdminDashboard } from "./pages/AdminDashboard";
 import RegisterPage from "./pages/RegisterPage";
+import { UserManagementPage } from "./pages/UserMangamentPage";
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
 
             <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
               <Route path="/admin/dashboard" element={<AdminDashboard />} />
+              <Route path="/admin/users" element={<UserManagementPage />} />
             </Route>
 
             <Route
