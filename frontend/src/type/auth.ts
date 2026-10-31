@@ -11,3 +11,20 @@ export interface LoginResponse {
 export interface ApiError {
   error: string;
 }
+
+export interface User {
+  id: number;
+  username: string;
+  role: "admin" | "karyawan" | "user";
+  created_at: string;
+}
+
+export interface CreateUserPayload {
+  username: string;
+  password?: string;
+  role: "admin" | "karyawan" | "user";
+}
+
+export interface UpdateUserPayload extends CreateUserPayload {
+  id: number;
+}

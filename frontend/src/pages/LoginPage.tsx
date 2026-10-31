@@ -3,8 +3,10 @@ import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
 import { api } from "../services/api";
-import { type LoginResponse, type ApiError } from "../type/auth";
-import axios from "axios";
+import { type LoginResponse } from "../type/auth";
+import { getApiError } from "../helper/error_handler";
+import AuthInput from "../components/AuthInput";
+import { ErrorMessage } from "../components/HandleMessage";
 
 const LoginPage: React.FC = () => {
   const [username, setUsername] = useState("");
@@ -34,12 +36,7 @@ const LoginPage: React.FC = () => {
         navigate("/dashboard");
       }
     } catch (err) {
-      if (axios.isAxiosError(err) && err.response) {
-        const apiError = err.response.data as ApiError;
-        setErrorMsg(apiError.error || "Terjadi kesalahan saat login.");
-      } else {
-        setErrorMsg("Gagal terhubung ke server.");
-      }
+      setErrorMsg(getApiError(err, "Terjadi kesalahan saat login."));
     } finally {
       setLoading(false);
     }
@@ -55,40 +52,26 @@ const LoginPage: React.FC = () => {
           </p>
         </div>
 
-        {errorMsg && (
-          <div className="mb-4 p-3 bg-red-500/10 border border-red-500/50 rounded-lg text-red-400 text-sm">
-            {errorMsg}
-          </div>
-        )}
+        <ErrorMessage message={errorMsg} />
 
         <form onSubmit={handleSubmit} className="space-y-5">
-          <div>
-            <label className="block text-sm font-medium text-slate-300 mb-1">
-              Username
-            </label>
-            <input
-              type="text"
-              required
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              className="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
-              placeholder="Masukkan username"
-            />
-          </div>
+          <AuthInput
+            id="username"
+            label="Username"
+            type="text"
+            onChange={setUsername}
+            value={username}
+            placeholder="Masukan username"
+          />
 
-          <div>
-            <label className="block text-sm font-medium text-slate-300 mb-1">
-              Password
-            </label>
-            <input
-              type="password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
-              placeholder="Masukkan password"
-            />
-          </div>
+          <AuthInput
+            id="password"
+            label="Password"
+            type="password"
+            value={password}
+            onChange={setPassword}
+            placeholder="Masukkan password"
+          />
 
           <button
             type="submit"
