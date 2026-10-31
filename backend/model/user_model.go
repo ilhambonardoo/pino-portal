@@ -13,7 +13,7 @@ type User struct {
 type RegisterRequest struct {
 	Username string `json:"username" validate:"required,alphanum,min=3,max=30"`
 	Password string `json:"password" validate:"required,min=6"`
-	Role     string `json:"role" validate:"omitempty,oneof=admin operator user"`
+	Role     string `json:"role" validate:"omitempty,oneof=admin karyawan user"`
 }
 
 type LoginRequest struct {
@@ -37,5 +37,5 @@ type UpdateUserRequest struct {
 	ID       int    `json:"id" validate:"required"`
 	Username string `json:"username" validate:"required,alphanum,min=3,max=30"`
 	Password string `json:"password" validate:"omitempty,min=6"`
-	Role     string `json:"role" validate:"required,oneof=admin operator user"`
+	Role     string `json:"role" validate:"required,oneof=admin karyawan user"`
 }
