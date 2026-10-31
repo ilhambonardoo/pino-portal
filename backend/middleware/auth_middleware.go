@@ -10,7 +10,10 @@ import (
 
 type contextKey string
 
-const UserRoleKey contextKey = "user"
+const (
+	UserRoleKey contextKey = "user_role"
+	UserIDKey contextKey = "user_id"
+)
 
 func AuthMiddleware(allowedRoles ...string) func(http.Handler) http.Handler{
 	return func (next http.Handler)http.Handler  {
@@ -38,6 +41,7 @@ func AuthMiddleware(allowedRoles ...string) func(http.Handler) http.Handler{
 			}
 			
 			ctx := context.WithValue(r.Context(), UserRoleKey, claims.Role)
+			ctx = context.WithValue(ctx, UserIDKey, claims.UserID)
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}

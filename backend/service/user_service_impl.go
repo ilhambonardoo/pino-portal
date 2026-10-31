@@ -125,14 +125,18 @@ func (s *UserServiceImpl) Update(ctx context.Context, req model.UpdateUserReques
 	}, nil
 }
 
-func (s *UserServiceImpl) Delete(ctx context.Context, userId int) error {
+func (s *UserServiceImpl) Delete(ctx context.Context, userId int, targetId int) error {
+	if userId == targetId {
+		return errors.New("Anda tidak dapat menghapus akun sendiri.")
+	}
+
 	tx, err := s.DB.BeginTx(ctx, nil)
 	if err != nil {
 		return err
 	}
 	defer helper.CommitOrRollBack(tx)
 
-	_, err = s.UserRepo.Delete(ctx, tx, userId)
+	_, err = s.UserRepo.Delete(ctx, tx, targetId)
 	return err
 }
 
