@@ -56,79 +56,79 @@ export const UserModal: React.FC<UserModalProps> = ({
   return (
     <>
       <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-        <div className="bg-slate-800 border border-slate-700 rounded-xl max-w-md w-full p-6 shadow-2xl">
-        <h2 className="text-xl font-bold text-white mb-4">
-          {initialData ? "Edit User" : "Tambah User Baru"}
-        </h2>
+        <div className="bg-neutral-800 border border-neutral-700 rounded-xl max-w-md w-full p-6 shadow-2xl">
+          <h2 className="text-xl font-bold text-white mb-4">
+            {initialData ? "Edit User" : "Tambah User Baru"}
+          </h2>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-slate-300 mb-1">
-              Username
-            </label>
-            <input
-              type="text"
-              required
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              className="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
-              placeholder="Username"
-            />
-          </div>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-neutral-300 mb-1">
+                Username
+              </label>
+              <input
+                type="text"
+                required
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                className="w-full px-4 py-2 bg-neutral-900 border border-neutral-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                placeholder="Username"
+              />
+            </div>
 
-          <div>
-            <label className="block text-sm font-medium text-slate-300 mb-1">
-              Password{" "}
-              {initialData && (
-                <span className="text-xs text-slate-400">
-                  (Biarkan kosong jika tidak ingin merubah)
-                </span>
-              )}
-            </label>
-            <input
-              type="password"
-              required={!initialData}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
-              placeholder={
-                initialData ? "••••••••" : "Password (min 6 karakter)"
-              }
-            />
-          </div>
+            <div>
+              <label className="block text-sm font-medium text-neutral-300 mb-1">
+                Password{" "}
+                {initialData && (
+                  <span className="text-xs text-neutral-400">
+                    (Biarkan kosong jika tidak ingin merubah)
+                  </span>
+                )}
+              </label>
+              <input
+                type="password"
+                required={!initialData}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full px-4 py-2 bg-neutral-900 border border-neutral-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                placeholder={
+                  initialData ? "••••••••" : "Password (min 6 karakter)"
+                }
+              />
+            </div>
 
-          <div>
-            <label className="block text-sm font-medium text-slate-300 mb-1">
-              Role
-            </label>
-            <select
-              value={role}
-              onChange={(e) => setRole(e.target.value as any)}
-              className="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
-            >
-              <option value="user">User</option>
-              <option value="karyawan">Karyawan</option>
-              <option value="admin">Admin</option>
-            </select>
-          </div>
+            <div>
+              <label className="block text-sm font-medium text-neutral-300 mb-1">
+                Role
+              </label>
+              <select
+                value={role}
+                onChange={(e) => setRole(e.target.value as any)}
+                className="w-full px-4 py-2 bg-neutral-900 border border-neutral-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
+              >
+                <option value="user">User</option>
+                <option value="karyawan">Karyawan</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
 
-          <div className="flex justify-end space-x-3 pt-4">
-            <button
-              type="button"
-              onClick={handleClose}
-              className="px-4 py-2 bg-slate-700 cursor-pointer hover:bg-slate-600 text-slate-200 rounded-lg text-sm font-medium transition-colors"
-            >
-              Batal
-            </button>
-            <button
-              type="submit"
-              disabled={loading}
-              className="px-4 py-2 cursor-pointer bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
-            >
-              {loading ? "Simpan..." : "Simpan"}
-            </button>
-          </div>
-        </form>
+            <div className="flex justify-end space-x-3 pt-4">
+              <button
+                type="button"
+                onClick={handleClose}
+                className="px-4 py-2 bg-neutral-700 cursor-pointer hover:bg-neutral-600 text-neutral-200 rounded-lg text-sm font-medium transition-colors"
+              >
+                Batal
+              </button>
+              <button
+                type="submit"
+                disabled={loading}
+                className="px-4 py-2 cursor-pointer bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
+              >
+                {loading ? "Simpan..." : "Simpan"}
+              </button>
+            </div>
+          </form>
         </div>
       </div>
       <ConfirmationModal

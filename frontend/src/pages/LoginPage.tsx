@@ -1,12 +1,13 @@
 import type React from "react";
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import { api } from "../services/api";
 import { type LoginResponse } from "../type/auth";
 import { getApiError } from "../helper/error_handler";
 import AuthInput from "../components/AuthInput";
 import { ErrorMessage } from "../components/HandleMessage";
+import { BiLeftArrowAlt } from "react-icons/bi";
 
 const LoginPage: React.FC = () => {
   const [username, setUsername] = useState("");
@@ -43,11 +44,17 @@ const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
-      <div className="max-w-md w-full bg-slate-800 rounded-xl shadow-lg border border-slate-700 p-8">
+    <div className="min-h-screen bg-neutral-900 flex items-center justify-center p-4">
+      <div className="max-w-md w-full bg-neutral-800 rounded-xl shadow-lg border border-neutral-700 p-8">
+        <NavLink to={"/"}>
+          <BiLeftArrowAlt
+            size={25}
+            className="text-white hover:text-neutral-300"
+          />
+        </NavLink>
         <div className="text-center mb-8">
           <h1 className="text-2xl font-bold text-white mb-2">Pino Portal</h1>
-          <p className="text-slate-400 text-sm">
+          <p className="text-neutral-400 text-sm">
             Silahkan login telebih dahulu
           </p>
         </div>
@@ -81,7 +88,7 @@ const LoginPage: React.FC = () => {
             {loading ? "Memproses..." : "Masuk"}
           </button>
         </form>
-        <div className="mt-6 text-center text-sm text-slate-400">
+        <div className="mt-6 text-center text-sm text-neutral-400">
           Belum punya akun?{" "}
           <Link
             to="/register"
