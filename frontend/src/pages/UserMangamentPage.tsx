@@ -76,13 +76,13 @@ export const UserManagementPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 text-white p-8">
+    <div className="min-h-screen bg-neutral-900 text-white p-8">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
           <div>
             <h1 className="text-2xl font-bold">Manajemen User</h1>
-            <p className="text-slate-400 text-sm">
+            <p className="text-neutral-400 text-sm">
               Kelola hak akses dan akun sistem Pino Portal
             </p>
           </div>
@@ -101,10 +101,10 @@ export const UserManagementPage: React.FC = () => {
         )}
 
         {/* User Table */}
-        <div className="bg-slate-800 border border-slate-700 rounded-xl overflow-hidden shadow-lg">
+        <div className="bg-neutral-800 border border-neutral-700 rounded-xl overflow-hidden shadow-lg">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-slate-900/50 border-b border-slate-700 text-slate-400 text-xs uppercase tracking-wider">
+              <tr className="bg-neutral-900/50 border-b border-neutral-700 text-neutral-400 text-xs uppercase tracking-wider">
                 <th className="p-4">ID</th>
                 <th className="p-4">Username</th>
                 <th className="p-4">Role</th>
@@ -112,16 +112,16 @@ export const UserManagementPage: React.FC = () => {
                 <th className="p-4 text-right">Aksi</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-700/50 text-sm">
+            <tbody className="divide-y divide-neutral-700/50 text-sm">
               {loading && users.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="p-4 text-center text-slate-400">
+                  <td colSpan={5} className="p-4 text-center text-neutral-400">
                     Memuat data...
                   </td>
                 </tr>
               ) : users.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="p-4 text-center text-slate-400">
+                  <td colSpan={5} className="p-4 text-center text-neutral-400">
                     Belum ada data user.
                   </td>
                 </tr>
@@ -129,9 +129,9 @@ export const UserManagementPage: React.FC = () => {
                 users.map((u) => (
                   <tr
                     key={u.id}
-                    className="hover:bg-slate-700/30 transition-colors"
+                    className="hover:bg-neutral-700/30 transition-colors"
                   >
-                    <td className="p-4 font-mono text-slate-400">#{u.id}</td>
+                    <td className="p-4 font-mono text-neutral-400">#{u.id}</td>
                     <td className="p-4 font-medium text-white">{u.username}</td>
                     <td className="p-4">
                       <span
@@ -140,13 +140,13 @@ export const UserManagementPage: React.FC = () => {
                             ? "bg-purple-500/10 text-purple-400 border border-purple-500/20"
                             : u.role === "karyawan"
                               ? "bg-blue-500/10 text-blue-400 border border-blue-500/20"
-                              : "bg-slate-500/10 text-slate-400 border border-slate-500/20"
+                              : "bg-neutral-500/10 text-neutral-400 border border-neutral-500/20"
                         }`}
                       >
                         {u.role}
                       </span>
                     </td>
-                    <td className="p-4 text-slate-400">
+                    <td className="p-4 text-neutral-400">
                       {new Date(u.created_at).toLocaleDateString("id-ID")}
                     </td>
                     <td className="p-4 text-right space-x-2">
