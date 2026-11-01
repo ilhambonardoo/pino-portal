@@ -46,7 +46,7 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
         role="dialog"
         aria-modal="true"
         aria-labelledby="confirmation-modal-title"
-        className="w-full max-w-sm overflow-hidden rounded-2xl border border-slate-700 bg-slate-800 shadow-2xl"
+        className="w-full max-w-sm overflow-hidden rounded-2xl border border-neutral-700 bg-neutral-800 shadow-2xl"
       >
         <div className="p-6">
           <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-blue-500/10 text-blue-400">
@@ -71,15 +71,15 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
           >
             {title}
           </h2>
-          <p className="mt-2 text-sm leading-6 text-slate-400">{message}</p>
+          <p className="mt-2 text-sm leading-6 text-neutral-400">{message}</p>
         </div>
 
-        <div className="flex justify-end gap-3 border-t border-slate-700 bg-slate-900/30 px-6 py-4">
+        <div className="flex justify-end gap-3 border-t border-neutral-700 bg-neutral-900/30 px-6 py-4">
           <button
             type="button"
             disabled={loading}
             onClick={onCancel}
-            className="rounded-lg cursor-pointer border border-slate-600 px-4 py-2 text-sm font-medium text-slate-300 transition-colors hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-lg cursor-pointer border border-neutral-600 px-4 py-2 text-sm font-medium text-neutral-300 transition-colors hover:bg-neutral-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {cancelLabel}
           </button>

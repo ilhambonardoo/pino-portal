@@ -4,6 +4,7 @@ import { api } from "../services/api";
 import { getApiError } from "../helper/error_handler";
 import AuthInput from "../components/AuthInput";
 import { ErrorMessage, SuccessMessage } from "../components/HandleMessage";
+import { BiLeftArrowAlt } from "react-icons/bi";
 
 const RegisterPage = () => {
   const [username, setUsername] = useState("");
@@ -43,11 +44,17 @@ const RegisterPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
-      <div className="max-w-md w-full bg-slate-800 rounded-xl shadow-lg border border-slate-700 p-8">
+    <div className="min-h-screen bg-neutral-900 flex items-center justify-center p-4">
+      <div className="max-w-md w-full bg-neutral-800 rounded-xl shadow-lg border border-neutral-700 p-8">
+        <button onClick={() => navigate(-1)}>
+          <BiLeftArrowAlt
+            size={25}
+            className="text-white cursor-pointer hover:text-neutral-300"
+          />
+        </button>
         <div className="text-center mb-8">
           <h1 className="text-2xl font-bold text-white mb-2">Pino Portal</h1>
-          <p className="text-slate-400 text-sm">Buat Akun Baru</p>
+          <p className="text-neutral-400 text-sm">Buat Akun Baru</p>
         </div>
 
         <ErrorMessage message={errorMsg} />
@@ -81,7 +88,7 @@ const RegisterPage = () => {
           </button>
         </form>
 
-        <div className="mt-6 text-center text-sm text-slate-400">
+        <div className="mt-6 text-center text-sm text-neutral-400">
           Sudah punya akun?{" "}
           <Link
             to="/login"
