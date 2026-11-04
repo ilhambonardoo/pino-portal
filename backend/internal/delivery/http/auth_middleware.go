@@ -1,9 +1,9 @@
-package middleware
+package http
 
 import (
 	"context"
 	"net/http"
-	"pino-portal/helper"
+	"pino-portal/internal/utils"
 	"slices"
 	"strings"
 )
@@ -25,7 +25,7 @@ func AuthMiddleware(allowedRoles ...string) func(http.Handler) http.Handler{
 			}
 
 			tokenString := strings.TrimPrefix(authHeader, "Bearer ")
-			claims, err := helper.ValidateToken(tokenString)
+			claims, err := utils.ValidateToken(tokenString)
 			if err != nil {
 				http.Error(w, `{"error":"`+err.Error()+`"}`, http.StatusUnauthorized)
 				return

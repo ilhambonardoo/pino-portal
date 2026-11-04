@@ -1,11 +1,11 @@
-package controller
+package http
 
 import (
 	"encoding/json"
 	"net/http"
-	"pino-portal/exception"
-	"pino-portal/model"
-	"pino-portal/service"
+	"pino-portal/internal/domain"
+	"pino-portal/internal/service"
+	"pino-portal/internal/utils"
 
 	"github.com/google/wire"
 )
@@ -26,37 +26,37 @@ var AuthControllerSet = wire.NewSet(
 )
 
 func (c *AuthControllerImpl) Register(writer http.ResponseWriter, request *http.Request) {
-	var req model.RegisterRequest
+	var req domain.RegisterRequest
 
 	if err := json.NewDecoder(request.Body).Decode(&req); err != nil {
-		exception.InvalidPayload(writer)
+		utils.InvalidPayload(writer)
 		return
 	}
 
 	err := c.AuthService.Register(request.Context(), req)
 
 	if err != nil {
-		exception.Error(writer, http.StatusBadRequest, err)
+		utils.Error(writer, http.StatusBadRequest, err)
 		return
 	}
 
-	exception.Message(writer, http.StatusCreated, "User berhasil didaftarkan")
+	utils.Message(writer, http.StatusCreated, "User berhasil didaftarkan")
 }
 
 func (c *AuthControllerImpl) Login(writer http.ResponseWriter, request *http.Request) {
-	var req model.LoginRequest
+	var req domain.LoginRequest
 
 	if err := json.NewDecoder(request.Body).Decode(&req); err != nil {
-		exception.InvalidPayload(writer)
+		utils.InvalidPayload(writer)
 		return
 	}
 
 	res, err := c.AuthService.Login(request.Context(), req)
 
 	if err != nil {
-		exception.Error(writer, http.StatusUnauthorized, err)
+		utils.Error(writer, http.StatusUnauthorized, err)
 		return
 	}
 
-	exception.JSON(writer, http.StatusOK, res)
+	utils.JSON(writer, http.StatusOK, res)
 }

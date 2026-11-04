@@ -6,9 +6,9 @@ package main
 import (
 	"net/http"
 	"pino-portal/app"
-	"pino-portal/controller"
-	"pino-portal/repository"
-	"pino-portal/service"
+	deliveryHttp "pino-portal/internal/delivery/http"
+	"pino-portal/internal/repository"
+	"pino-portal/internal/service"
 
 	"github.com/google/wire"
 )
@@ -20,8 +20,8 @@ func InitializedServer() *http.Server {
 		repository.UserRepositorySet,
 		service.AuthServiceSet,
 		service.UserServiceSet,
-		controller.AuthControllerSet,
-		controller.UserControllerSet,
+		deliveryHttp.AuthControllerSet,
+		deliveryHttp.UserControllerSet,
 		app.ServerSet,
 	)
 	return nil

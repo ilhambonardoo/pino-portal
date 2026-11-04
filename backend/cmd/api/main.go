@@ -2,13 +2,13 @@ package main
 
 import (
 	"log"
-	"pino-portal/helper"
+	"pino-portal/config"
 
 	_ "github.com/go-sql-driver/mysql"
 )
 
 func main(){
-	helper.LoadEnv()
+	config.LoadEnv()
 
 	server := InitializedServer()
 

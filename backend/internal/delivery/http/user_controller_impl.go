@@ -1,12 +1,11 @@
-package controller
+package http
 
 import (
 	"encoding/json"
 	"net/http"
-	"pino-portal/exception"
-	"pino-portal/middleware"
-	"pino-portal/model"
-	"pino-portal/service"
+	"pino-portal/internal/domain"
+	"pino-portal/internal/service"
+	"pino-portal/internal/utils"
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
@@ -26,7 +25,7 @@ func NewUserController(userService service.UserService) *UserControllerImpl {
 func parseUserID(writer http.ResponseWriter, request *http.Request) (int, bool) {
 	id, err := strconv.Atoi(chi.URLParam(request, "id"))
 	if err != nil || id <= 0 {
-		exception.InvalidID(writer)
+		utils.InvalidID(writer)
 		return 0, false
 	}
 
@@ -39,20 +38,20 @@ var UserControllerSet = wire.NewSet(
 )
 
 func (c *UserControllerImpl) Create(writer http.ResponseWriter, request *http.Request) {
-	var req model.RegisterRequest
+	var req domain.RegisterRequest
 
 	if err := json.NewDecoder(request.Body).Decode(&req); err != nil {
-		exception.InvalidPayload(writer)
+		utils.InvalidPayload(writer)
 		return
 	}
 
 	res, err := c.UserService.Create(request.Context(), req)
 	if err != nil {
-		exception.Error(writer, http.StatusBadRequest, err)
+		utils.Error(writer, http.StatusBadRequest, err)
 		return
 	}
 
-	exception.JSON(writer, http.StatusCreated, res)
+	utils.JSON(writer, http.StatusCreated, res)
 }
 
 func (c *UserControllerImpl) Update(writer http.ResponseWriter, request *http.Request) {
@@ -61,9 +60,9 @@ func (c *UserControllerImpl) Update(writer http.ResponseWriter, request *http.Re
 		return
 	}
 
-	var req model.UpdateUserRequest
+	var req domain.UpdateUserRequest
 	if err := json.NewDecoder(request.Body).Decode(&req); err != nil {
-		exception.InvalidPayload(writer)
+		utils.InvalidPayload(writer)
 		return
 	}
 
@@ -71,11 +70,11 @@ func (c *UserControllerImpl) Update(writer http.ResponseWriter, request *http.Re
 
 	res, err := c.UserService.Update(request.Context(), req)
 	if err != nil {
-		exception.Error(writer, http.StatusBadRequest, err)
+		utils.Error(writer, http.StatusBadRequest, err)
 		return
 	}
 
-	exception.JSON(writer, http.StatusOK, res)
+	utils.JSON(writer, http.StatusOK, res)
 }
 
 func (c *UserControllerImpl) Delete(writer http.ResponseWriter, request *http.Request) {
@@ -84,23 +83,23 @@ func (c *UserControllerImpl) Delete(writer http.ResponseWriter, request *http.Re
 		return
 	}
 
-	userID, ok := request.Context().Value(middleware.UserIDKey).(int)
+	userID, ok := request.Context().Value(UserIDKey).(int)
 	if err := c.UserService.Delete(request.Context(), userID, targetID); err != nil {
-		exception.Error(writer, http.StatusBadRequest, err)
+		utils.Error(writer, http.StatusBadRequest, err)
 		return
 	}
 
-	exception.Message(writer, http.StatusOK, "User berhasil dihapus")
+	utils.Message(writer, http.StatusOK, "User berhasil dihapus")
 }
 
 func (c *UserControllerImpl) FindAll(writer http.ResponseWriter, request *http.Request) {
 	users, err := c.UserService.FindAll(request.Context())
 	if err != nil {
-		exception.Error(writer, http.StatusInternalServerError, err)
+		utils.Error(writer, http.StatusInternalServerError, err)
 		return
 	}
 
-	exception.JSON(writer, http.StatusOK, users)
+	utils.JSON(writer, http.StatusOK, users)
 }
 
 func (c *UserControllerImpl) FindByID(writer http.ResponseWriter, request *http.Request) {
@@ -111,9 +110,9 @@ func (c *UserControllerImpl) FindByID(writer http.ResponseWriter, request *http.
 
 	user, err := c.UserService.FindByID(request.Context(), id)
 	if err != nil {
-		exception.Error(writer, http.StatusNotFound, err)
+		utils.Error(writer, http.StatusNotFound, err)
 		return
 	}
 
-	exception.JSON(writer, http.StatusOK, user)
+	utils.JSON(writer, http.StatusOK, user)
 }
