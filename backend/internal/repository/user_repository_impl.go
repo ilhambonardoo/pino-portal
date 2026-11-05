@@ -4,7 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"pino-portal/model"
+	"pino-portal/internal/domain"
 
 	"github.com/google/wire"
 )
@@ -21,7 +21,7 @@ var UserRepositorySet = wire.NewSet(
 	wire.Bind(new(UserRepository), new(*UserRepositoryImpl)),
 )
 
-func (r *UserRepositoryImpl) Save(ctx context.Context, tx *sql.Tx, user model.User) (model.User, error){
+func (r *UserRepositoryImpl) Save(ctx context.Context, tx *sql.Tx, user domain.User) (domain.User, error){
 	query := "INSERT INTO users (username, password_hash, role) VALUES (?, ?, ?)"
 	res, err := tx.ExecContext(ctx, query, user.Username, user.PasswordHash, user.Role)
 
@@ -38,11 +38,11 @@ func (r *UserRepositoryImpl) Save(ctx context.Context, tx *sql.Tx, user model.Us
 	return user, nil
 }
 
-func (r *UserRepositoryImpl) FindByUsername(ctx context.Context, db Queryer, username string) (model.User, error){
+func (r *UserRepositoryImpl) FindByUsername(ctx context.Context, db Queryer, username string) (domain.User, error){
 	query := "SELECT id, username, password_hash, role, created_at FROM users WHERE username = ?"
 	row := db.QueryRowContext(ctx, query, username)
 	
-	var user model.User
+	var user domain.User
 
 	err := row.Scan(&user.ID, &user.Username, &user.PasswordHash, &user.Role, &user.CreatedAt)
 	if err != nil {
@@ -55,11 +55,11 @@ func (r *UserRepositoryImpl) FindByUsername(ctx context.Context, db Queryer, use
 	return user, nil
 }
 
-func (r *UserRepositoryImpl) FindByID(ctx context.Context, db Queryer, userId int) (model.User, error){
+func (r *UserRepositoryImpl) FindByID(ctx context.Context, db Queryer, userId int) (domain.User, error){
 	query := "SELECT id, username, password_hash, role, created_at FROM users WHERE id = ?"
 	row := db.QueryRowContext(ctx, query, userId)
 
-	var user model.User
+	var user domain.User
 
 	err := row.Scan(&user.ID, &user.Username, &user.PasswordHash, &user.Role, &user.CreatedAt)
 	if err != nil {
@@ -72,7 +72,7 @@ func (r *UserRepositoryImpl) FindByID(ctx context.Context, db Queryer, userId in
 	return user, err
 }
 
-func (r *UserRepositoryImpl) FindAll(ctx context.Context, db Queryer) ([]model.User, error){
+func (r *UserRepositoryImpl) FindAll(ctx context.Context, db Queryer) ([]domain.User, error){
 	query := "SELECT id, username, role, created_at FROM users"
 	rows, err := db.QueryContext(ctx, query)
 	if err != nil {
@@ -80,9 +80,9 @@ func (r *UserRepositoryImpl) FindAll(ctx context.Context, db Queryer) ([]model.U
 	}
 	defer rows.Close()
 
-	var users []model.User
+	var users []domain.User
 	for rows.Next(){
-		var user model.User
+		var user domain.User
 		err := rows.Scan(&user.ID, &user.Username, &user.Role, &user.CreatedAt)
 		if err != nil{
 			return  nil, err
@@ -93,7 +93,7 @@ func (r *UserRepositoryImpl) FindAll(ctx context.Context, db Queryer) ([]model.U
 	return users, nil
 }
 
-func (r *UserRepositoryImpl) Update(ctx context.Context, tx *sql.Tx, user model.User) (model.User, error) {
+func (r *UserRepositoryImpl) Update(ctx context.Context, tx *sql.Tx, user domain.User) (domain.User, error) {
 	query := "UPDATE users SET username = ?, password_hash = ?, role = ? WHERE id = ? "
 	_, err := tx.ExecContext(ctx, query, user.Username, user.PasswordHash, user.Role, user.ID)
 	if err != nil {
@@ -102,7 +102,7 @@ func (r *UserRepositoryImpl) Update(ctx context.Context, tx *sql.Tx, user model.
 	return user, nil
 }
 
-func (r *UserRepositoryImpl) Delete(ctx context.Context, tx *sql.Tx, userId int) (model.User, error) {
+func (r *UserRepositoryImpl) Delete(ctx context.Context, tx *sql.Tx, userId int) (domain.User, error) {
 	user, err := r.FindByID(ctx, tx, userId)
 	if err != nil {
 		return user, errors.New("User tidak ditemukan")

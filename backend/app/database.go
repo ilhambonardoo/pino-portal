@@ -4,16 +4,16 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
-	"pino-portal/helper"
+	"pino-portal/config"
 	"time"
 )
 
 func NewDB() *sql.DB{
-	dbUser := helper.GetEnv("DB_USER", "root")
-	dbPass := helper.GetEnv("DB_PASS", "")
-	dbHost := helper.GetEnv("DB_HOST", "127.0.0.1")
-	dbPort := helper.GetEnv("DB_PORT", "3307")
-	dbName := helper.GetEnv("DB_NAME", "pino_db")
+	dbUser := config.GetEnv("DB_USER", "root")
+	dbPass := config.GetEnv("DB_PASS", "")
+	dbHost := config.GetEnv("DB_HOST", "127.0.0.1")
+	dbPort := config.GetEnv("DB_PORT", "3307")
+	dbName := config.GetEnv("DB_NAME", "pino_db")
 
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local", dbUser, dbPass, dbHost, dbPort, dbName)
 

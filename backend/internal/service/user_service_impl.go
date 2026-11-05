@@ -4,9 +4,9 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"pino-portal/helper"
-	"pino-portal/model"
-	"pino-portal/repository"
+	"pino-portal/internal/domain"
+	"pino-portal/internal/repository"
+	"pino-portal/internal/utils"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/google/wire"
@@ -32,33 +32,33 @@ var UserServiceSet = wire.NewSet(
 	wire.Bind(new(UserService), new(*UserServiceImpl)),
 )
 
-func (s *UserServiceImpl) Create(ctx context.Context, req model.RegisterRequest) (model.UserResponse, error) {
+func (s *UserServiceImpl) Create(ctx context.Context, req domain.RegisterRequest) (domain.UserResponse, error) {
 	if req.Role == "" {
 		req.Role = "user"
 	}
 
 	err := s.Validate.Struct(req)
 	if err != nil {
-		return model.UserResponse{}, errors.New("validasi gagal: " + err.Error())
+		return domain.UserResponse{}, errors.New("validasi gagal: " + err.Error())
 	}
 
 	tx, err := s.DB.BeginTx(ctx, nil)
 	if err != nil {
-		return model.UserResponse{}, err
+		return domain.UserResponse{}, err
 	}
-	defer helper.CommitOrRollBack(tx)
+	defer utils.CommitOrRollBack(tx)
 
 	_, err = s.UserRepo.FindByUsername(ctx, tx, req.Username)
 	if err == nil {
-		return model.UserResponse{}, errors.New("username sudah terdaftar")
+		return domain.UserResponse{}, errors.New("username sudah terdaftar")
 	}
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
-		return model.UserResponse{}, err
+		return domain.UserResponse{}, err
 	}
 
-	user := model.User{
+	user := domain.User{
 		Username:     req.Username,
 		PasswordHash: string(hashedPassword),
 		Role:         req.Role,
@@ -66,10 +66,10 @@ func (s *UserServiceImpl) Create(ctx context.Context, req model.RegisterRequest)
 
 	savedUser, err := s.UserRepo.Save(ctx, tx, user)
 	if err != nil {
-		return model.UserResponse{}, err
+		return domain.UserResponse{}, err
 	}
 
-	return model.UserResponse{
+	return domain.UserResponse{
 		ID:        savedUser.ID,
 		Username:  savedUser.Username,
 		Role:      savedUser.Role,
@@ -77,27 +77,27 @@ func (s *UserServiceImpl) Create(ctx context.Context, req model.RegisterRequest)
 	}, nil
 }
 
-func (s *UserServiceImpl) Update(ctx context.Context, req model.UpdateUserRequest) (model.UserResponse, error) {
+func (s *UserServiceImpl) Update(ctx context.Context, req domain.UpdateUserRequest) (domain.UserResponse, error) {
 	err := s.Validate.Struct(req)
 	if err != nil {
-		return model.UserResponse{}, errors.New("validasi gagal: " + err.Error())
+		return domain.UserResponse{}, errors.New("validasi gagal: " + err.Error())
 	}
 
 	tx, err := s.DB.BeginTx(ctx, nil)
 	if err != nil {
-		return model.UserResponse{}, err
+		return domain.UserResponse{}, err
 	}
-	defer helper.CommitOrRollBack(tx)
+	defer utils.CommitOrRollBack(tx)
 
 	existingUser, err := s.UserRepo.FindByID(ctx, tx, req.ID)
 	if err != nil {
-		return model.UserResponse{}, errors.New("user tidak ditemukan")
+		return domain.UserResponse{}, errors.New("user tidak ditemukan")
 	}
 
 	if existingUser.Username != req.Username {
 		_, err := s.UserRepo.FindByUsername(ctx, tx, req.Username)
 		if err == nil {
-			return model.UserResponse{}, errors.New("username sudah digunakan")
+			return domain.UserResponse{}, errors.New("username sudah digunakan")
 		}
 	}
 
@@ -107,17 +107,17 @@ func (s *UserServiceImpl) Update(ctx context.Context, req model.UpdateUserReques
 	if req.Password != "" {
 		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 		if err != nil {
-			return model.UserResponse{}, err
+			return domain.UserResponse{}, err
 		}
 		existingUser.PasswordHash = string(hashedPassword)
 	}
 
 	updatedUser, err := s.UserRepo.Update(ctx, tx, existingUser)
 	if err != nil {
-		return model.UserResponse{}, err
+		return domain.UserResponse{}, err
 	}
 
-	return model.UserResponse{
+	return domain.UserResponse{
 		ID:        updatedUser.ID,
 		Username:  updatedUser.Username,
 		Role:      updatedUser.Role,
@@ -134,19 +134,19 @@ func (s *UserServiceImpl) Delete(ctx context.Context, userId int, targetId int) 
 	if err != nil {
 		return err
 	}
-	defer helper.CommitOrRollBack(tx)
+	defer utils.CommitOrRollBack(tx)
 
 	_, err = s.UserRepo.Delete(ctx, tx, targetId)
 	return err
 }
 
-func (s *UserServiceImpl) FindByID(ctx context.Context, userId int) (model.UserResponse, error) {
+func (s *UserServiceImpl) FindByID(ctx context.Context, userId int) (domain.UserResponse, error) {
 	user, err := s.UserRepo.FindByID(ctx, s.DB, userId)
 	if err != nil {
-		return model.UserResponse{}, errors.New("user tidak ditemukan")
+		return domain.UserResponse{}, errors.New("user tidak ditemukan")
 	}
 
-	return model.UserResponse{
+	return domain.UserResponse{
 		ID:        user.ID,
 		Username:  user.Username,
 		Role:      user.Role,
@@ -154,15 +154,15 @@ func (s *UserServiceImpl) FindByID(ctx context.Context, userId int) (model.UserR
 	}, nil
 }
 
-func (s *UserServiceImpl) FindAll(ctx context.Context) ([]model.UserResponse, error) {
+func (s *UserServiceImpl) FindAll(ctx context.Context) ([]domain.UserResponse, error) {
 	users, err := s.UserRepo.FindAll(ctx, s.DB)
 	if err != nil {
 		return nil, err
 	}
 
-	var responses []model.UserResponse
+	var responses []domain.UserResponse
 	for _, u := range users {
-		responses = append(responses, model.UserResponse{
+		responses = append(responses, domain.UserResponse{
 			ID:        u.ID,
 			Username:  u.Username,
 			Role:      u.Role,

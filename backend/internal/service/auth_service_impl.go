@@ -4,9 +4,9 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"pino-portal/helper"
-	"pino-portal/model"
-	"pino-portal/repository"
+	"pino-portal/internal/domain"
+	"pino-portal/internal/repository"
+	"pino-portal/internal/utils"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/google/wire"
@@ -32,7 +32,7 @@ var AuthServiceSet = wire.NewSet(
 	wire.Bind(new(AuthService), new(*AuthServiceImpl)),
 )
 
-func (s *AuthServiceImpl) Register(ctx context.Context, req model.RegisterRequest) error {
+func (s *AuthServiceImpl) Register(ctx context.Context, req domain.RegisterRequest) error {
 	err := s.Validate.Struct(req)
 	if err != nil {
 		return errors.New("Validasi gagal: " + err.Error())
@@ -44,7 +44,7 @@ func (s *AuthServiceImpl) Register(ctx context.Context, req model.RegisterReques
 		return err
 	}
 
-	defer helper.CommitOrRollBack(tx)
+	defer utils.CommitOrRollBack(tx)
 
 	_, err = s.UserRepo.FindByUsername(ctx, tx, req.Username)
 	if err == nil {
@@ -59,7 +59,7 @@ func (s *AuthServiceImpl) Register(ctx context.Context, req model.RegisterReques
 
 	req.Role = "user"
 
-	user := model.User {
+	user := domain.User {
 		Username: req.Username,
 		PasswordHash: string(hashedPassword),
 		Role: req.Role,
@@ -70,28 +70,28 @@ func (s *AuthServiceImpl) Register(ctx context.Context, req model.RegisterReques
 	return err
 }
 
-func (s *AuthServiceImpl) Login(ctx context.Context, req model.LoginRequest) (model.LoginResponse, error) {
+func (s *AuthServiceImpl) Login(ctx context.Context, req domain.LoginRequest) (domain.LoginResponse, error) {
 	err := s.Validate.Struct(req)
 	if err != nil {
-		return model.LoginResponse{}, errors.New("Validasi gagal:" + err.Error())
+		return domain.LoginResponse{}, errors.New("Validasi gagal:" + err.Error())
 	}
 
 	user, err := s.UserRepo.FindByUsername(ctx, s.DB, req.Username)
 	if err != nil {
-		return model.LoginResponse{}, errors.New("Username atau password salah")
+		return domain.LoginResponse{}, errors.New("Username atau password salah")
 	}
 	
 	err = bcrypt.CompareHashAndPassword([]byte (user.PasswordHash), []byte(req.Password))
 	if err != nil {
-		return model.LoginResponse{}, errors.New("Username atau password salah")
+		return domain.LoginResponse{}, errors.New("Username atau password salah")
 	}
 
-	token, err := helper.GenerateToken(user.ID, user.Role)
+	token, err := utils.GenerateToken(user.ID, user.Role)
 	if err != nil {
-		return model.LoginResponse{}, err
+		return domain.LoginResponse{}, err
 	}
 
-	return model.LoginResponse{
+	return domain.LoginResponse{
 		Token: token,
 		Role: user.Role,
 	}, nil
