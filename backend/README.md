@@ -1,130 +1,160 @@
-# 🤖 Pino Portal Backend
+# Pino Portal Backend
 
-Backend API performa tinggi berbasis **Go (Golang)** untuk memfasilitasi otentikasi (JWT/RBAC), manajemen _dashboard_, serta komunikasi _real-time_ via WebSocket antara **Robot Pino** dan **Home Assistant (HASS)**.
+Backend API berbasis Go untuk autentikasi JWT, kontrol akses berbasis role (RBAC), dan manajemen user. Aplikasi menggunakan MySQL sebagai database dan Chi sebagai HTTP router.
 
----
+## Tech Stack
 
-## 🛠️ Tech Stack & Dependencies
+- Go 1.26.5
+- Chi v5 untuk routing dan middleware HTTP
+- MySQL melalui `go-sql-driver/mysql`
+- JWT v5 untuk autentikasi
+- Bcrypt melalui `golang.org/x/crypto`
+- Wire untuk dependency injection
+- `godotenv` untuk membaca file `.env`
 
-- **Framework & Router:** [`go-chi/chi v5`](https://github.com/go-chi/chi)
-- **Database Driver:** [`go-sql-driver/mysql`](https://github.com/go-sql-driver/mysql)
-- **Real-Time Communication:** [`gorilla/websocket`](https://github.com/gorilla/websocket)
-- **Authentication & Security:** [`golang-jwt/jwt v5`](https://github.com/golang-jwt/jwt) & [`golang.org/x/crypto`](https://golang.org/x/crypto) (Bcrypt)
-- **CORS Middleware:** [`rs/cors`](https://github.com/rs/cors)
-
----
-
-## 📁 Struktur Proyek
-
-Proyek ini menerapkan arsitektur terpisah (_layered architecture_) untuk memastikan keterbacaan kode (_maintainability_) dan kemudahan pengujian (_testability_):
+## Struktur Proyek
 
 ```text
-pino-portal/
-├── app/          # Inisialisasi Database MySQL & Setup Router
-├── controller/   # REST Handlers (Auth, Dashboard) & Handler WS
-│   ├── auth_controller.go
-│   ├── dashboard_controller.go
-│   └── websocket_controller.go  # Engine real-time Robot Pino & HASS
-├── middleware/   # Middleware Otentikasi JWT & RBAC (Role-Based Access Control)
-├── model/        # Struct Data Domain, Request, & Response DTO
-├── repository/   # Akses & Query Database MySQL
-├── service/      # Logika Bisnis Utama (Ruang Lingkup RBAC, Aturan Perangkat)
-├── helper/       # Utility Error Handling & Format Standar JSON Response
-├── main.go       # Entry Point Aplikasi Go
+backend/
+├── app/
+│   ├── database.go       # Koneksi dan konfigurasi MySQL
+│   └── server.go         # Router, middleware, dan route HTTP
+├── cmd/api/
+│   ├── main.go            # Entry point aplikasi
+│   ├── injector.go        # Definisi dependency injection Wire
+│   └── wire_gen.go        # Kode hasil generate Wire
+├── config/config.go       # Pembacaan environment variable
+├── db/migrations/         # Direktori migration database
+├── internal/
+│   ├── delivery/http/     # Controller dan middleware HTTP
+│   ├── domain/            # Model domain dan request/response
+│   ├── repository/        # Akses data dan query database
+│   ├── service/           # Logika bisnis
+│   └── utils/             # JWT, error handler, dan utilitas transaksi
 ├── go.mod
 └── go.sum
-
 ```
 
----
+Alur request mengikuti pola `delivery -> service -> repository`. Dependency aplikasi dirakit melalui Wire pada `cmd/api`.
 
-## 🚀 Panduan Instalasi & Memulai
+## Instalasi dan Menjalankan
 
-### 1. Prasyarat
-
-Pastikan Anda telah menginstal **Go** (versi 1.18+) dan **MySQL Server** di mesin lokal/server Anda.
-
-### 2. Install Dependensi
-
-Jalankan perintah berikut di terminal untuk mengunduh semua library yang dibutuhkan:
+Semua perintah berikut dijalankan dari direktori `backend`:
 
 ```bash
-# Router HTTP & CORS
-go get -u github.com/go-chi/chi/v5
-go get -u github.com/rs/cors
-
-# Engine WebSocket
-go get -u github.com/gorilla/websocket
-
-# Driver Database MySQL
-go get -u github.com/go-sql-driver/mysql
-
-# JWT & Hashing Password untuk Auth/RBAC
-go get -u github.com/golang-jwt/jwt/v5
-go get -u golang.org/x/crypto
-
-# godotenv untuk konfigurasi file .env
-go get -u github.com/joho/godotenv
-
-# Install library wire ke dalam modul
-go get github.com/google/wire
-
-# Install CLI tool wire untuk generate kode
-go install github.com/google/wire/cmd/wire@lates
-
-# Install library validator
-go get github.com/go-playground/validator/v10
-
+cd backend
+go mod download
 ```
 
-Atau cukup jalankan perintah otomatis dari `go.mod`:
+### Database
 
-```bash
-go mod tidy
+Pastikan MySQL aktif, lalu buat database yang digunakan aplikasi:
 
+```sql
+CREATE DATABASE pino_db;
 ```
 
-### 3. Konfigurasi Lingkungan (.env)
+Direktori `db/migrations` belum berisi migration. Jika tabel belum dibuat, siapkan schema database secara manual sebelum menjalankan server.
 
-Buat file `.env` di root direktori project untuk mengatur konfigurasi database dan rahasia JWT:
+### Environment Variable
+
+Buat file `backend/.env`:
 
 ```env
 PORT=8080
 DB_HOST=127.0.0.1
-DB_PORT=3306
+DB_PORT=3307
 DB_USER=root
-DB_PASSWORD=your_password
-DB_NAME=pino_portal_db
+DB_PASS=your_password
+DB_NAME=pino_db
 JWT_SECRET=your_super_secret_jwt_key
-
 ```
 
-### 4. Menjalankan Server
+Nilai default yang digunakan aplikasi adalah `PORT=8080`, `DB_HOST=127.0.0.1`, `DB_PORT=3307`, `DB_USER=root`, `DB_PASS=` dan `DB_NAME=pino_db`. File `.env` bersifat opsional jika environment variable sudah tersedia di sistem.
 
-Jalankan perintah berikut untuk mengeksekusi entry point:
+### Menjalankan Server
 
 ```bash
-go run main.go
-
+go run ./cmd/api
 ```
 
-Server HTTP & WebSocket akan berjalan di `http://localhost:8080`.
+Server tersedia di `http://localhost:8080` atau port yang ditentukan oleh `PORT`.
 
----
+### Test dan Generate Wire
 
-## 📌 Endpoint API Utama
+```bash
+go test ./...
+go generate ./cmd/api
+```
 
-| Method | Endpoint                | Deskripsi                                         | Akses         |
-| ------ | ----------------------- | ------------------------------------------------- | ------------- |
-| `POST` | `/api/v1/auth/register` | Pendaftaran pengguna baru                         | Public        |
-| `POST` | `/api/v1/auth/login`    | Otentikasi & Penerbitan JWT Token                 | Public        |
-| `GET`  | `/api/v1/dashboard`     | Menampilkan metrik & status perangkat             | Authenticated |
-| `GET`  | `/ws/pino-hass`         | Endpoint duplex WebSocket untuk Robot Pino & HASS | WS Upgrade    |
+Perintah generate Wire membutuhkan CLI Wire. Instal jika belum tersedia:
 
----
+```bash
+go install github.com/google/wire/cmd/wire@latest
+```
 
-## 🔐 Keamanan & Otentikasi
+## Endpoint API
 
-- **JWT (JSON Web Token):** Setiap request terkunci memerlukan _header_ `Authorization: Bearer <token>`.
-- **RBAC (Role-Based Access Control):** Pengaksesan fitur dibatasi berdasarkan peran (Role) pengguna melalui layer `middleware/`.
-- **Password Security:** Seluruh password di-hash menggunakan algoritma Bcrypt dari `golang.org/x/crypto`.
+### Public
+
+| Method | Endpoint                | Deskripsi                 |
+| ------ | ----------------------- | ------------------------- |
+| `POST` | `/api/v1/auth/register` | Mendaftarkan user baru    |
+| `POST` | `/api/v1/auth/login`    | Login dan mendapatkan JWT |
+
+Contoh register:
+
+```bash
+curl -X POST http://localhost:8080/api/v1/auth/register \
+	-H 'Content-Type: application/json' \
+	-d '{"username":"admin","password":"password123","role":"admin"}'
+```
+
+Contoh login:
+
+```bash
+curl -X POST http://localhost:8080/api/v1/auth/login \
+	-H 'Content-Type: application/json' \
+	-d '{"username":"admin","password":"password123"}'
+```
+
+Response login berisi `token` dan `role`:
+
+```json
+{
+  "token": "<jwt-token>",
+  "role": "admin"
+}
+```
+
+### Admin Only
+
+Semua endpoint berikut membutuhkan header `Authorization: Bearer <jwt-token>` dan role `admin`.
+
+| Method   | Endpoint                  | Deskripsi                       |
+| -------- | ------------------------- | ------------------------------- |
+| `GET`    | `/api/v1/users/`          | Mengambil semua user            |
+| `POST`   | `/api/v1/users/`          | Membuat user                    |
+| `GET`    | `/api/v1/users/{id}`      | Mengambil user berdasarkan ID   |
+| `PUT`    | `/api/v1/users/{id}`      | Memperbarui user                |
+| `DELETE` | `/api/v1/users/{id}`      | Menghapus user                  |
+| `GET`    | `/api/v1/admin/dashboard` | Mengambil pesan dashboard admin |
+
+Contoh request endpoint yang dilindungi:
+
+```bash
+curl http://localhost:8080/api/v1/users/ \
+	-H 'Authorization: Bearer <jwt-token>'
+```
+
+Role yang didukung user adalah `admin`, `karyawan`, dan `user`. Password tidak dikembalikan pada response API.
+
+## Autentikasi dan Keamanan
+
+- Password disimpan dalam bentuk hash Bcrypt.
+- JWT dikirim melalui header `Authorization` dengan format `Bearer <token>`.
+- Request tanpa token atau dengan token tidak valid menghasilkan `401 Unauthorized`.
+- User dengan role selain `admin` menghasilkan `403 Forbidden` untuk route admin.
+- CORS dikonfigurasi untuk menerima request dari semua origin.
+
+Endpoint dashboard umum dan WebSocket belum terdaftar pada router saat ini.
