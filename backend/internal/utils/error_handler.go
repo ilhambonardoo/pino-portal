@@ -38,3 +38,9 @@ func InvalidPayload(w http.ResponseWriter) {
         Error: "Payload tidak valid",
     })
 }
+
+func InvalidDeviceID(w http.ResponseWriter) {
+    JSON(w, http.StatusBadRequest, ErrorResponse{
+        Error: "ID device tidak valid",
+    })
+}
