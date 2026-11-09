@@ -18,10 +18,13 @@ func InitializedServer() *http.Server {
 	wire.Build(
 		app.NewDB,
 		repository.UserRepositorySet,
+		repository.DeviceRepositorySet,
 		service.AuthServiceSet,
 		service.UserServiceSet,
+		service.DeviceServiceSet,
 		deliveryHttp.AuthControllerSet,
 		deliveryHttp.UserControllerSet,
+		deliveryHttp.DeviceControllerSet,
 		app.ServerSet,
 	)
 	return nil

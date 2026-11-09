@@ -18,6 +18,7 @@ var ServerSet = wire.NewSet(NewServer)
 func NewServer(
 	authController deliveryHttp.AuthController,
 	userController deliveryHttp.UserController,
+	deviceController deliveryHttp.DeviceController,
 ) *http.Server {
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
@@ -55,6 +56,15 @@ func NewServer(
 			w.Header().Set("Content-Type", "application/json")
 			w.Write([]byte(`{"message":"Selamat datang di Dashboard Admin Robot Pino!"}`))
 		})
+	})
+
+	// Route Device
+	r.Route("/api/v1/devices", func(r chi.Router) {
+		r.Use(deliveryHttp.AuthMiddleware())
+		r.Get("/", deviceController.FindAll)
+		r.Post("/", deviceController.Create)
+		r.Post("/{id}/controller", deviceController.Control)
+		r.Delete("/{id}", deviceController.Delete)
 	})
 
 	port := config.GetEnv("PORT", "8080")
