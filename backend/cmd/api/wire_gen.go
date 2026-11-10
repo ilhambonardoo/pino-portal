@@ -12,7 +12,9 @@ import (
 	http2 "pino-portal/internal/delivery/http"
 	"pino-portal/internal/repository"
 	"pino-portal/internal/service"
+)
 
+import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
@@ -25,6 +27,9 @@ func InitializedServer() *http.Server {
 	authControllerImpl := http2.NewAuthController(authServiceImpl)
 	userServiceImpl := service.NewUserService(userRepositoryImpl, db)
 	userControllerImpl := http2.NewUserController(userServiceImpl)
-	server := app.NewServer(authControllerImpl, userControllerImpl)
+	deviceRepositoryImpl := repository.NewDeviceRepository()
+	deviceServiceImpl := service.NewDeviceService(deviceRepositoryImpl, db)
+	deviceControllerImpl := http2.NewDeviceController(deviceServiceImpl)
+	server := app.NewServer(authControllerImpl, userControllerImpl, deviceControllerImpl)
 	return server
 }

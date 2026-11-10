@@ -8,12 +8,7 @@ import (
 	"strings"
 )
 
-type contextKey string
 
-const (
-	UserRoleKey contextKey = "user_role"
-	UserIDKey contextKey = "user_id"
-)
 
 func AuthMiddleware(allowedRoles ...string) func(http.Handler) http.Handler{
 	return func (next http.Handler)http.Handler  {
@@ -40,8 +35,8 @@ func AuthMiddleware(allowedRoles ...string) func(http.Handler) http.Handler{
 				}
 			}
 			
-			ctx := context.WithValue(r.Context(), UserRoleKey, claims.Role)
-			ctx = context.WithValue(ctx, UserIDKey, claims.UserID)
+			ctx := context.WithValue(r.Context(), utils.UserRoleKey, claims.Role)
+			ctx = context.WithValue(ctx, utils.UserIDKey, claims.UserID)
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}
