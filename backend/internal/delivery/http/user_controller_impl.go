@@ -83,7 +83,7 @@ func (c *UserControllerImpl) Delete(writer http.ResponseWriter, request *http.Re
 		return
 	}
 
-	userID, ok := request.Context().Value(UserIDKey).(int)
+	userID, ok := request.Context().Value(utils.UserIDKey).(int)
 	if err := c.UserService.Delete(request.Context(), userID, targetID); err != nil {
 		utils.Error(writer, http.StatusBadRequest, err)
 		return
