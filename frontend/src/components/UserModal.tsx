@@ -37,7 +37,7 @@ export const UserModal: React.FC<UserModalProps> = ({
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
     setPendingPayload({ username, password, role });
   };
