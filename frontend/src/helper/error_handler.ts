@@ -1,11 +1,24 @@
 import axios from "axios";
 import type { ApiError } from "../type/auth";
+import { getFriendlyApiError } from "./api_error_message";
 
 export function getApiError(error: unknown, fallbackMessage: string): string {
   if (axios.isAxiosError(error) && error.response) {
     const apiError = error.response.data as ApiError;
-    return apiError.error || fallbackMessage;
+    return getFriendlyApiError(
+      apiError.error,
+      error.response.status,
+      fallbackMessage,
+    );
   }
 
-  return "Gagal terhubung ke server";
+  if (axios.isAxiosError(error)) {
+    return "Gagal terhubung ke server";
+  }
+
+  if (error instanceof Error && error.message) {
+    return error.message;
+  }
+
+  return fallbackMessage;
 }
