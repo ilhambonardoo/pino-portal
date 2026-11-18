@@ -83,6 +83,65 @@ func (s *DeviceServiceImpl) Create(ctx context.Context, req domain.CreateDeviceR
 	}, nil
 }
 
+func (s *DeviceServiceImpl) Update(ctx context.Context, req domain.UpdateDeviceRequest, currentUserID int, role string) (domain.DeviceResponse, error) {
+	if err := s.Validate.Struct(req); err != nil {
+		return domain.DeviceResponse{}, errors.New("Validasi gagal: " + err.Error())
+	}
+
+	existing, err := s.DeviceRepo.FindById(ctx, s.DB, req.ID)
+	if err != nil {
+		return domain.DeviceResponse{}, errors.New("Perangkat tidak ditemukan")
+	}
+
+	if role != "admin" && (existing.OwnerID == nil || *existing.OwnerID != currentUserID) {
+		return domain.DeviceResponse{}, errors.New("Akses ditolak: tidak memiliki hak untuk mengubah perangkat ini")
+	}
+
+	if role != "admin" {
+		if req.IsPrivate {
+			req.OwnerID = &currentUserID
+		} else {
+			req.OwnerID = nil
+		}
+	} else if req.IsPrivate && req.OwnerID == nil {
+		req.OwnerID = &currentUserID
+	}
+
+	existing.Name = req.Name
+	existing.Type = req.Type
+	existing.Status = req.Status
+	existing.IsPrivate = req.IsPrivate
+	existing.OwnerID = req.OwnerID
+
+	tx, err := s.DB.BeginTx(ctx, nil)
+	if err != nil {
+		return domain.DeviceResponse{}, err
+	}
+	defer tx.Rollback()
+
+	updated, err := s.DeviceRepo.Update(ctx, tx, existing)
+	if err != nil {
+		return domain.DeviceResponse{}, err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return domain.DeviceResponse{}, err
+	}
+
+	return domain.DeviceResponse{
+		ID:         updated.ID,
+		Name:       updated.Name,
+		DeviceKey:  updated.DeviceKey,
+		Type:       updated.Type,
+		Status:     updated.Status,
+		State:      updated.State,
+		IsPrivate:  updated.IsPrivate,
+		OwnerID:    updated.OwnerID,
+		LastActive: updated.LastActive,
+		CreatedAt:  updated.CreatedAt,
+	}, nil
+}
+
 func (s *DeviceServiceImpl) FindAll(ctx context.Context, currentUserID int, role string) ([]domain.DeviceResponse, error) {
 	isAdmin := (role == "admin")
 	devices, err := s.DeviceRepo.FindAllAccessible(ctx, s.DB, currentUserID, isAdmin)
