@@ -63,6 +63,7 @@ func NewServer(
 		r.Use(deliveryHttp.AuthMiddleware())
 		r.Get("/", deviceController.FindAll)
 		r.Post("/", deviceController.Create)
+		r.Put("/{id}", deviceController.Update)
 		r.Post("/{id}/controller", deviceController.Control)
 		r.Delete("/{id}", deviceController.Delete)
 	})
