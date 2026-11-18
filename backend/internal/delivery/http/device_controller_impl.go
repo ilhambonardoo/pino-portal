@@ -20,7 +20,6 @@ func NewDeviceController(deviceService service.DeviceService) *DeviceControllerI
 	return &DeviceControllerImpl{DeviceService: deviceService}
 }
 
-
 var DeviceControllerSet = wire.NewSet(
 	NewDeviceController,
 	wire.Bind(new(DeviceController), new(*DeviceControllerImpl)),
@@ -45,6 +44,35 @@ func (c *DeviceControllerImpl) Create(writer http.ResponseWriter, request *http.
 	}
 
 	utils.JSON(writer, http.StatusCreated, res)
+}
+
+func (c *DeviceControllerImpl) Update(writer http.ResponseWriter, request *http.Request) {
+	userID, role, ok := utils.AuthContext(writer, request)
+	if !ok {
+		return
+	}
+
+	idStr := chi.URLParam(request, "id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil || id <= 0 {
+		utils.InvalidDeviceID(writer)
+		return
+	}
+
+	var req domain.UpdateDeviceRequest
+	if err := json.NewDecoder(request.Body).Decode(&req); err != nil {
+		utils.InvalidPayload(writer)
+		return
+	}
+	req.ID = id
+
+	res, err := c.DeviceService.Update(request.Context(), req, userID, role)
+	if err != nil {
+		utils.Error(writer, http.StatusBadRequest, err)
+		return
+	}
+
+	utils.JSON(writer, http.StatusOK, res)
 }
 
 func (c *DeviceControllerImpl) FindAll(writer http.ResponseWriter, request *http.Request) {
